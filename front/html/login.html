@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Fit - Login</title>
+  <style>
+    body {
+      /* Ajustei o gradiente para ser mais "fit" */
+      background: linear-gradient(to right, #020202, #47484a);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+    }
+
+    .login-container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(216, 117, 4, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #c96603;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #c96603;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      /* Adicionando box-sizing para o padding não quebrar o layout */
+      box-sizing: border-box; 
+    }
+
+    /* Mudei o 'input[type="submit"]' para 'button[type="submit"]' */
+    button[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background-color: #c96603; /* Cor primária do novo gradiente */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #29292a; /* Cor secundária */
+    }
+
+    .register-link {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .register-link a {
+      text-decoration: none;
+      color: #9b5204;
+    }
+
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+
+    .error-message {
+      color: rgb(228, 105, 5);
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 15px;
+      /* Oculto por padrão, o JS vai exibir */
+      display: none; 
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .back-link a {
+      text-decoration: none;
+      color: #555;
+    }
+
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Social Fit 🏋️‍♂️</h2>
+    
+    <form id="login-form">
+      <div class="error-message" id="error-message"></div>
+
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email" value="joao@email.com" />
+      </div>
+
+      <div class="form-group">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" value="123" />
+      </div>
+      
+      <button type="submit">Entrar</button>
+    </form>
+
+    <div class="register-link">
+      <a href="register.html">Registrar-se</a>
+    </div>
+
+    <div class="back-link">
+      <a href="#">← Voltar para Página Inicial</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('login-form');
+    const errorMsg = document.getElementById('error-message');
+    const API_URL = 'http://localhost:5000/api'; // URL da sua API
+
+    form.addEventListener('submit', async function (e) {
+      // 1. Previne o envio padrão do formulário
+      e.preventDefault(); 
+
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      // 2. Faz a sua validação que já existia
+      if (email === '' || senha === '') {
+        errorMsg.innerText = 'Preencha todos os campos.';
+        errorMsg.style.display = 'block';
+      } else if (!emailRegex.test(email)) {
+        errorMsg.innerText = 'Digite um e-mail válido.';
+        errorMsg.style.display = 'block';
+      } else {
+        // 3. Se a validação passar, chama a API
+        errorMsg.style.display = 'none';
+        try {
+          const response = await fetch(`${API_URL}/usuarios/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            // O backend espera {email: '...', senha: '...'}
+            body: JSON.stringify({ email, senha }) 
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            // 4. Se o login der certo (OK)
+            console.log('Login com sucesso:', data.usuario);
+            // Salva o usuário no 'localStorage' do navegador
+            localStorage.setItem('socialFitUser', JSON.stringify(data.usuario));
+            // Redireciona para a página principal
+            window.location.href = 'index.html';
+          } else {
+            // 5. Se a API retornar um erro (ex: senha errada)
+            errorMsg.innerText = data.erro || 'Erro ao fazer login.';
+            errorMsg.style.display = 'block';
+          }
+        } catch (error) {
+          // 6. Se o servidor (app.py) estiver offline
+          console.error('Erro de rede:', error);
+          errorMsg.innerText = 'Não foi possível conectar ao servidor.';
+          errorMsg.style.display = 'block';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

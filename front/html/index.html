@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Fit - Feed</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* ESTILOS DA SUA PÁGINA POWERFIT (BASE) */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    body {
+      background-color: #111;
+      color: #fff;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 800px; /* Um pouco mais largo para o feed */
+      margin: auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      background-color: #000;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 2px solid #656262;
+    }
+
+    header h1 {
+      color: #a14b05;
+      font-size: 2rem;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      background-color: #e47a09;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+
+    footer {
+      background-color: #000;
+      text-align: center;
+      padding: 20px;
+      color: #aaa;
+      margin-top: 40px;
+    }
+
+    /* ESTILOS ADAPTADOS DO NOSSO FEED PARA O TEMA DARK */
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    #user-name {
+        font-weight: bold;
+    }
+    
+    /* Card de "Novo Post" e Cards do Feed */
+    .card {
+      background-color: #222;
+      padding: 25px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      border: 1px solid #333;
+    }
+
+    h2, h3 {
+        color: #b15407;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #444;
+        padding-bottom: 10px;
+    }
+
+    /* Estilos para o formulário de novo post */
+    .form-group {
+        margin-bottom: 15px;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #ccc;
+    }
+    input[type="text"],
+    input[type="number"],
+    textarea {
+        width: 100%;
+        padding: 12px;
+        border-radius: 5px;
+        border: 1px solid #444;
+        background-color: #333;
+        color: #fff;
+        font-size: 1rem;
+    }
+    textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    .form-row {
+        display: flex;
+        gap: 15px;
+    }
+    .form-row .form-group {
+        flex: 1;
+    }
+
+    /* Estilos para os posts no feed */
+    .post-card {
+        background-color: #1c1c1c;
+        border: 1px solid #333;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .post-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    .post-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #474343;
+    }
+    .post-author-info .name {
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    .post-author-info .date {
+        font-size: 0.8rem;
+        color: #888;
+    }
+    .post-content p {
+        margin-bottom: 15px;
+    }
+    .post-stats {
+        display: flex;
+        gap: 10px;
+        color: #ccc;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+    .post-stats span {
+        background-color: #333;
+        padding: 5px 10px;
+        border-radius: 15px;
+    }
+    .post-meta {
+        color: #888;
+        font-size: 0.9rem;
+    }
+    .post-actions {
+        display: flex;
+        border-top: 1px solid #444;
+        margin-top: 15px;
+        padding-top: 10px;
+        gap: 10px;
+    }
+    .action-btn {
+        flex: 1;
+        background: none;
+        border: 1px solid #555;
+        padding: 10px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #ccc;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: all 0.2s ease;
+    }
+    .action-btn:hover {
+        background-color: #333;
+        border-color: #a55b07;
+    }
+    .action-btn.liked {
+        color: #ff0000; /* Cor quando curtido */
+        border-color: #c16905;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Social Fit 🏋️‍♂️</h1>
+    <div class="user-info">
+      <span id="user-name">Carregando...</span>
+      <button id="logout-btn" class="btn">Sair</button>
+    </div>
+  </header>
+
+  <main class="container">
+    
+    <section class="card" id="create-post-card">
+      <h3>Qual o seu treino de hoje?</h3>
+      <form id="post-form">
+        <div class="form-group">
+          <textarea id="post-conteudo" placeholder="Descreva sua atividade, conquistas e como você se sentiu!" required></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="post-tipo">Exercício</label>
+            <input type="text" id="post-tipo" placeholder="Ex: Musculação">
+          </div>
+          <div class="form-group">
+            <label for="post-duracao">Duração (min)</label>
+            <input type="number" id="post-duracao" placeholder="Ex: 60">
+          </div>
+          <div class="form-group">
+            <label for="post-calorias">Calorias (kcal)</label>
+            <input type="number" id="post-calorias" placeholder="Ex: 500">
+          </div>
+        </div>
+        <button type="submit" class="btn">Postar</button>
+      </form>
+    </section>
+
+    <h2>Seu Feed</h2>
+    <section id="feed-container">
+      </section>
+
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Social Fit | Projeto Faculdade 💪</p>
+  </footer>
+
+  <script>
+    // URL base da sua API Flask
+    const API_URL = 'http://localhost:5000/api';
+
+    // 1. Verifica se o usuário está logado
+    const user = JSON.parse(localStorage.getItem('socialFitUser'));
+    if (!user) {
+        // Se não estiver logado, redireciona para a página de login
+        window.location.href = 'login.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // 2. Personaliza a página com dados do usuário
+        document.getElementById('user-name').textContent = `Olá, ${user.nome}!`;
+
+        // 3. Carrega o feed
+        loadFeed();
+
+        // 4. Configura botão de Logout
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('socialFitUser');
+            window.location.href = 'login.html';
+        });
+
+        // 5. Configura formulário de novo post
+        document.getElementById('post-form').addEventListener('submit', handleCreatePost);
+        
+        // 6. Configura cliques de "Curtir" (usando delegação de eventos)
+        document.getElementById('feed-container').addEventListener('click', handleLikeClick);
+    });
+
+    /**
+     * Busca o feed do usuário na API e o renderiza na tela
+     */
+    async function loadFeed() {
+        const feedContainer = document.getElementById('feed-container');
+        feedContainer.innerHTML = '<p>Carregando feed...</p>'; // Feedback de loading
+
+        try {
+            const response = await fetch(`${API_URL}/feed/${user.id}`);
+            if (!response.ok) {
+                throw new Error('Falha ao carregar o feed');
+            }
+            
+            const posts = await response.json();
+
+            if (posts.length === 0) {
+                feedContainer.innerHTML = '<p>Seu feed está vazio. Siga alguém ou crie seu primeiro post!</p>';
+                return;
+            }
+
+            feedContainer.innerHTML = '';
+            posts.forEach(post => {
+                feedContainer.appendChild(createPostElement(post));
+            });
+
+        } catch (error) {
+            console.error('Erro ao carregar feed:', error);
+            feedContainer.innerHTML = '<p style="color: red;">Não foi possível carregar o feed.</p>';
+        }
+    }
+
+    /**
+     * Cria o elemento HTML para um único post
+     */
+    function createPostElement(post) {
+        const postCard = document.createElement('div');
+        postCard.className = 'post-card';
+        postCard.dataset.postId = post.id; 
+
+        const postDate = new Date(post.data_criacao).toLocaleString('pt-BR');
+        const likedClass = post.curtido_por_mim ? 'liked' : '';
+        const likeText = post.curtido_por_mim ? 'Descurtir' : 'Curtir';
+
+        postCard.innerHTML = `
+            <div class="post-header">
+                <img src="https://ui-avatars.com/api/?name=${post.autor.nome.replace(' ', '+')}&background=ff0000&color=fff&bold=true" alt="Avatar" class="post-avatar">
+                <div class="post-author-info">
+                    <span class="name">${post.autor.nome}</span>
+                    <span class="date">${postDate}</span>
+                </div>
+            </div>
+            <div class="post-content">
+                <p>${post.conteudo}</p>
+            </div>
+            <div class="post-stats">
+                ${post.tipo_exercicio ? `<span>💪 ${post.tipo_exercicio}</span>` : ''}
+                ${post.duracao ? `<span>⏱️ ${post.duracao} min</span>` : ''}
+                ${post.calorias ? `<span>🔥 ${post.calorias} kcal</span>` : ''}
+            </div>
+            <div class="post-meta">
+                <span id="likes-count-${post.id}">${post.qtd_curtidas} curtidas</span>
+            </div>
+            <div class="post-actions">
+                <button class="action-btn like-btn ${likedClass}" data-post-id="${post.id}">${likeText}</button>
+                <button class="action-btn comment-btn">Comentar</button>
+            </div>
+        `;
+        return postCard;
+    }
+
+    /**
+     * Lida com o submit do formulário de novo post
+     */
+    async function handleCreatePost(e) {
+        e.preventDefault();
+
+        const postData = {
+            conteudo: document.getElementById('post-conteudo').value,
+            autor_id: user.id,
+            tipo_exercicio: document.getElementById('post-tipo').value || null,
+            duracao: parseInt(document.getElementById('post-duracao').value) || null,
+            calorias: parseInt(document.getElementById('post-calorias').value) || null,
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/posts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(postData)
+            });
+
+            if (response.status === 201) {
+                document.getElementById('post-form').reset();
+                loadFeed();
+            } else {
+                const errorData = await response.json();
+                alert(`Erro ao criar post: ${errorData.erro}`);
+            }
+        } catch (error) {
+            console.error('Erro de rede:', error);
+            alert('Não foi possível conectar ao servidor para postar.');
+        }
+    }
+
+    /**
+     * Lida com cliques no botão "Curtir/Descurtir"
+     */
+    async function handleLikeClick(e) {
+        if (!e.target.classList.contains('like-btn')) return;
+
+        const likeButton = e.target;
+        const postId = likeButton.dataset.postId;
+        const isLiked = likeButton.classList.contains('liked');
+
+        const url = isLiked ? `${API_URL}/curtir/${user.id}/${postId}` : `${API_URL}/curtir`;
+        const method = isLiked ? 'DELETE' : 'POST';
+        const body = isLiked ? null : JSON.stringify({ usuario_id: user.id, post_id: parseInt(postId) });
+        
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: body
+            });
+            const data = await response.json();
+            
+            if (response.ok) {
+                likeButton.classList.toggle('liked');
+                likeButton.textContent = likeButton.classList.contains('liked') ? 'Descurtir' : 'Curtir';
+                document.getElementById(`likes-count-${postId}`).textContent = `${data.total_curtidas} curtidas`;
+            } else {
+                alert(`Erro: ${data.erro}`);
+            }
+        } catch (error) {
+            console.error('Erro de rede ao curtir/descurtir:', error);
+        }
+    }
+  </script>
+
+</body>
+</html>
