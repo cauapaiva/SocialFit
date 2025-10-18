@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Fit - Cadastro</title>
+  <style>
+    body {
+      /* Mesmo gradiente azul do login para consistência */
+      background: linear-gradient(to right, #131313, #606164);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+    }
+
+    .register-container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      /* Adicionando box-sizing para o padding não quebrar o layout */
+      box-sizing: border-box; 
+    }
+
+    .button {
+      width: 100%;
+      padding: 12px;
+      /* Mesma cor de botão do login */
+      background-color: #c96603;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .button:hover {
+      background-color: #c96603; /* Cor hover */
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .back-link a {
+      text-decoration: none;
+      color: #f08103; /* Cor principal */
+    }
+
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+
+    /* Mensagem de Erro (vermelha) */
+    .message-container {
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 5px;
+      display: none; /* Oculto por padrão */
+    }
+    .error {
+      color: #D8000C;
+      background-color: #FFD2D2;
+    }
+    /* Mensagem de Sucesso (verde) */
+    .success {
+      color: #4F8A10;
+      background-color: #DFF2BF;
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <h2>Cadastro Social Fit 🏋️‍♂️</h2>
+    
+    <form id="register-form">
+      <div id="message-container" class="message-container"></div>
+
+      <div class="form-group">
+        <label for="nome">Nome de Usuário</label>
+        <input type="text" id="nome" name="nome" />
+      </div>
+
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" />
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirme sua Senha</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" />
+      </div>
+
+      <button type="submit" class="button">Cadastrar</button>
+    </form>
+
+    <div class="back-link">
+      <a href="login.html">← Voltar para o login</a>
+    </div>
+    </div>
+
+  <script>
+    const registerForm = document.getElementById('register-form');
+    const messageContainer = document.getElementById('message-container');
+    const API_URL = 'http://localhost:5000/api';
+
+    registerForm.addEventListener('submit', async function (e) {
+      // 1. Previne o envio padrão do formulário
+      e.preventDefault(); 
+
+      const nome = document.getElementById('nome').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value.trim();
+      const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+      const nameRegex = /^[A-Za-zÀ-ÿ\s]+$/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      // 2. Função para mostrar erros
+      function showError(message) {
+        messageContainer.textContent = message;
+        messageContainer.className = 'message-container error'; // Classe de erro
+        messageContainer.style.display = 'block';
+      }
+
+      // 3. Função para mostrar sucesso
+      function showSuccess(message) {
+        messageContainer.textContent = message;
+        messageContainer.className = 'message-container success'; // Classe de sucesso
+        messageContainer.style.display = 'block';
+      }
+
+      // 4. Sua validação de frontend (mantida)
+      if (!nome || !email || !senha || !confirmPassword) {
+        showError('Preencha todos os campos.');
+        return; // Para a execução
+      }
+      if (!nameRegex.test(nome)) {
+        showError('O nome deve conter apenas letras.');
+        return;
+      }
+      if (!emailRegex.test(email)) {
+        showError('Digite um e-mail válido.');
+        return;
+      }
+      if (senha !== confirmPassword) {
+        showError('As senhas não coincidem.');
+        return;
+      }
+
+      // 5. Se a validação passar, esconde erros e tenta chamar a API
+      messageContainer.style.display = 'none';
+
+      // O backend espera {nome, email, senha}
+      // Opcionalmente, você poderia adicionar 'bio' e 'nivel_fitness' aqui
+      const userData = { nome, email, senha };
+
+      try {
+        const response = await fetch(`${API_URL}/usuarios`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userData)
+        });
+
+        const data = await response.json();
+
+        // O backend retorna '201 Created' em sucesso
+        if (response.status === 201) {
+          // 6. Sucesso!
+          showSuccess('Cadastro realizado com sucesso! Redirecionando para o login...');
+          // Redireciona para o login após 3 segundos
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 3000);
+        } else {
+          // 7. Erro da API (ex: "Email já cadastrado")
+          showError(data.erro || 'Erro ao cadastrar.');
+        }
+      } catch (error) {
+        // 8. Erro de rede (API offline)
+        console.error('Erro de rede:', error);
+        showError('Não foi possível conectar ao servidor.');
+      }
+    });
+  </script>
+</body>
+</html>
